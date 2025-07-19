@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Writing Space</title>
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --danger-color: #ea4335;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333;
+            --medium-gray: #757575;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Auth Forms */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .auth-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+        
+        .auth-form .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .auth-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .auth-form input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .auth-form input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .auth-form button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .auth-form button:hover {
+            background-color: #3367d6;
+        }
+        
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .auth-switch a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            color: var(--danger-color);
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        /* App Interface */
+        .app-container {
+            display: none;
+        }
+        
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        
+        .app-title {
+            color: var(--primary-color);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-email {
+            margin-right: 15px;
+            color: var(--medium-gray);
+        }
+        
+        .logout-btn {
+            padding: 8px 15px;
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .logout-btn:hover {
+            background-color: #d33426;
+        }
+        
+        .editor-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .toolbar {
+            display: flex;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            background-color: #f9f9f9;
+        }
+        
+        .tool-button {
+            background: none;
+            border: none;
+            padding: 5px 10px;
+            margin-right: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .tool-button:hover {
+            background-color: #eee;
+        }
+        
+        .tool-separator {
+            width: 1px;
+            background-color: #ddd;
+            margin: 0 10px;
+        }
+        
+        #editor {
+            min-height: 500px;
+            padding: 20px;
+            outline: none;
+        }
+        
+        .save-status {
+            padding: 10px 20px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #eee;
+            text-align: right;
+            color: var(--medium-gray);
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .auth-box {
+                padding: 30px 20px;
+            }
+            
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .user-info {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Container -->
+    <div class="auth-container" id="auth-container">
+        <div class="auth-box">
+            <h1 class="auth-title">Private Writing Space</h1>
+            
+            <!-- Login Form -->
+            <form class="auth-form" id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required>
+                    <div class="error-message" id="login-email-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required minlength="6">
+                    <div class="error-message" id="login-password-error"></div>
+                </div>
+                
+                <button type="submit">Log In</button>
+                
+                <div class="auth-switch">
+                    Don't have an account? <a href="#" id="show-register">Sign up</a>
+                </div>
+            </form>
+            
+            <!-- Registration Form -->
+            <form class="auth-form" id="register-form" style="display: none;">
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required>
+                    <div class="error-message" id="register-email-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-password">Password (min 6 characters)</label>
+                    <input type="password" id="register-password" required minlength="6">
+                    <div class="error-message" id="register-password-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-confirm">Confirm Password</label>
+                    <input type="password" id="register-confirm" required minlength="6">
+                    <div class="error-message" id="register-confirm-error"></div>
+                </div>
+                
+                <button type="submit">Create Account</button>
+                
+                <div class="auth-switch">
+                    Already have an account? <a href="#" id="show-login">Log in</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- App Container (shown after login) -->
+    <div class="container app-container" id="app-container">
+        <div class="app-header">
+            <h1 class="app-title">Private Writing Space</h1>
+            <div class="user-info">
+                <span class="user-email" id="user-email"></span>
+                <button class="logout-btn" id="logout-btn">Log Out</button>
+            </div>
+        </div>
+        
+        <div class="editor-container">
+            <div class="toolbar">
+                <button class="tool-button" data-command="bold" title="Bold">B</button>
+                <button class="tool-button" data-command="italic" title="Italic">I</button>
+                <button class="tool-button" data-command="underline" title="Underline">U</button>
+                <div class="tool-separator"></div>
+                <button class="tool-button" data-command="insertUnorderedList" title="Bullet List">•</button>
+                <button class="tool-button" data-command="insertOrderedList" title="Numbered List">1.</button>
+                <div class="tool-separator"></div>
+                <button class="tool-button" data-command="formatBlock" data-value="h1" title="Heading 1">H1</button>
+                <button class="tool-button" data-command="formatBlock" data-value="h2" title="Heading 2">H2</button>
+                <button class="tool-button" data-command="formatBlock" data-value="p" title="Paragraph">P</button>
+            </div>
+            
+            <div id="editor" contenteditable="true"></div>
+            
+            <div class="save-status" id="save-status">
+                Changes saved automatically
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const authContainer = document.getElementById('auth-container');
+            const appContainer = document.getElementById('app-container');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const showRegister = document.getElementById('show-register');
+            const showLogin = document.getElementById('show-login');
+            const logoutBtn = document.getElementById('logout-btn');
+            const userEmailSpan = document.getElementById('user-email');
+            const editor = document.getElementById('editor');
+            const saveStatus = document.getElementById('save-status');
+            const toolButtons = document.querySelectorAll('.tool-button');
+            
+            // Simulated database (in a real app, this would be server-side)
+            const users = JSON.parse(localStorage.getItem('writing-app-users')) || {};
+            const userData = JSON.parse(localStorage.getItem('writing-app-data')) || {};
+            
+            // Check if user is already logged in
+            const currentUser = localStorage.getItem('writing-app-current-user');
+            if (currentUser) {
+                showApp(currentUser);
+            }
+            
+            // Switch between login and register forms
+            showRegister.addEventListener('click', function(e) {
+                e.preventDefault();
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                clearErrors();
+            });
+            
+            showLogin.addEventListener('click', function(e) {
+                e.preventDefault();
+                registerForm.style.display = 'none';
+                loginForm.style.display = 'block';
+                clearErrors();
+            });
+            
+            // Login form submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value;
+                
+                clearErrors();
+                
+                // Validation
+                if (!email) {
+                    showError('login-email-error', 'Email is required');
+                    return;
+                }
+                
+                if (!password) {
+                    showError('login-password-error', 'Password is required');
+                    return;
+                }
+                
+                // Check if user exists
+                if (!users[email]) {
+                    showError('login-email-error', 'Email not found');
+                    return;
+                }
+                
+                // Check password (in a real app, this would compare hashed passwords)
+                if (users[email].password !== password) {
+                    showError('login-password-error', 'Incorrect password');
+                    return;
+                }
+                
+                // Login successful
+                showApp(email);
+            });
+            
+            // Register form submission
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('register-email').value.trim();
+                const password = document.getElementById('register-password').value;
+                const confirm = document.getElementById('register-confirm').value;
+                
+                clearErrors();
+                
+                // Validation
+                if (!email) {
+                    showError('register-email-error', 'Email is required');
+                    return;
+                }
+                
+                if (!isValidEmail(email)) {
+                    showError('register-email-error', 'Please enter a valid email');
+                    return;
+                }
+                
+                if (!password) {
+                    showError('register-password-error', 'Password is required');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showError('register-password-error', 'Password must be at least 6 characters');
+                    return;
+                }
+                
+                if (password !== confirm) {
+                    showError('register-confirm-error', 'Passwords do not match');
+                    return;
+                }
+                
+                // Check if email already exists
+                if (users[email]) {
+                    showError('register-email-error', 'Email already registered');
+                    return;
+                }
+                
+                // Register user (in a real app, password would be hashed)
+                users[email] = { password };
+                localStorage.setItem('writing-app-users', JSON.stringify(users));
+                
+                // Initialize user data
+                if (!userData[email]) {
+                    userData[email] = { content: '' };
+                    localStorage.setItem('writing-app-data', JSON.stringify(userData));
+                }
+                
+                // Automatically log in
+                showApp(email);
+            });
+            
+            // Logout
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('writing-app-current-user');
+                authContainer.style.display = 'flex';
+                appContainer.style.display = 'none';
+            });
+            
+            // Editor toolbar buttons
+            toolButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const command = this.dataset.command;
+                    const value = this.dataset.value;
+                    
+                    if (command === 'formatBlock') {
+                        document.execCommand(command, false, value);
+                    } else {
+                        document.execCommand(command, false, null);
+                    }
+                    
+                    editor.focus();
+                });
+            });
+            
+            // Auto-save content
+            let saveTimer;
+            editor.addEventListener('input', function() {
+                clearTimeout(saveTimer);
+                saveStatus.textContent = 'Saving...';
+                
+                saveTimer = setTimeout(() => {
+                    const currentUser = localStorage.getItem('writing-app-current-user');
+                    if (currentUser) {
+                        userData[currentUser].content = editor.innerHTML;
+                        localStorage.setItem('writing-app-data', JSON.stringify(userData));
+                        saveStatus.textContent = 'Changes saved';
+                        
+                        setTimeout(() => {
+                            saveStatus.textContent = 'Changes saved automatically';
+                        }, 2000);
+                    }
+                }, 1000);
+            });
+            
+            // Helper functions
+            function showApp(email) {
+                localStorage.setItem('writing-app-current-user', email);
+                authContainer.style.display = 'none';
+                appContainer.style.display = 'block';
+                userEmailSpan.textContent = email;
+                
+                // Load user's content
+                if (userData[email] && userData[email].content) {
+                    editor.innerHTML = userData[email].content;
+                } else {
+                    editor.innerHTML = '<p>Start writing here...</p>';
+                }
+            }
+            
+            function showError(elementId, message) {
+                const element = document.getElementById(elementId);
+                element.textContent = message;
+            }
+            
+            function clearErrors() {
+                const errorElements = document.querySelectorAll('.error-message');
+                errorElements.forEach(el => el.textContent = '');
+            }
+            
+            function isValidEmail(email) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            }
+        });
+    </script>
+</body>
+</html>
